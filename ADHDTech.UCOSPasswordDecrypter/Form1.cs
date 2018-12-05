@@ -14,10 +14,10 @@ using System.Net.NetworkInformation;
 namespace WindowsFormsApplication1
 {
 
-
     public partial class Form1 : Form
     {
         Form AboutBox = new DRSBackupDecrypter.AboutBox1();
+        UCOSHostCfg myUCSHostCfg = new UCOSHostCfg();
 
         public Form1()
         {
@@ -258,6 +258,54 @@ namespace WindowsFormsApplication1
             // Open passphrase decode window
             ADHDTech.CiscoCrypt.DecodePassphraseForm oPassphraseDecodeForm = new ADHDTech.CiscoCrypt.DecodePassphraseForm();
             oPassphraseDecodeForm.ShowDialog();
+        }
+
+        private void FormSelectUCOSHost_Closed(object sender, EventArgs e)
+        {
+            if (myUCSHostCfg.sUCOSHost.Length > 0 && myUCSHostCfg.sUCOSRemoteUser.Length > 0 && myUCSHostCfg.sUCOSPassphrase.Length > 8) {
+                // Let's try to open the security files
+                ADHDTech.CiscoSCP.UCOSClientSFTP testClient = new ADHDTech.CiscoSCP.UCOSClientSFTP(myUCSHostCfg.sUCOSHost, myUCSHostCfg.sUCOSRemoteUser, myUCSHostCfg.sUCOSPassphrase);
+                Dictionary<string, byte[]> filePack = testClient.GetSecurityFilePack();
+
+                ADHDTech.CiscoCrypt.platformConfigXML.PlatformData oPlatformConfig = ADHDTech.CiscoCrypt.Functions.LoadPlatformConfigBytes(filePack[@"/usr/local/platform/conf/platformConfig.xml"]);
+                DRSD.sUCVersion = oPlatformConfig.Version;
+                DRSD.sUCProduct = oPlatformConfig.ProductDeployment.First().ParamValue;
+                DRSD.sLocalHostName = oPlatformConfig.LocalHostName.First().ParamValue;
+                DRSD.sLocalHostIP0 = oPlatformConfig.LocalHostIP0.First().ParamValue;
+                DRSD.sLocalHostAdminName = oPlatformConfig.LocalHostAdminName.First().ParamValue;
+                DRSD.sLocalHostAdminPwCrypt = oPlatformConfig.LocalHostAdminPwCrypt.First().ParamValue;
+                DRSD.sSftpPwCrypt = oPlatformConfig.SftpPwCrypt.First().ParamValue;
+                DRSD.sIPSecSecurityPwCrypt = oPlatformConfig.SftpPwCrypt.First().ParamValue;
+                DRSD.sApplUserUsername = oPlatformConfig.ApplUserUsername.First().ParamValue;
+                DRSD.sApplUserPwCrypt = oPlatformConfig.ApplUserPwCrypt.First().ParamValue;
+
+
+                //textBox2.ReadOnly = false;
+                //DRSD.sBackupSetDirectory = Path.GetDirectoryName(openFileDialog1.FileName);
+                //DRSD.sBackupSetXMLFilename = Path.GetFileName(openFileDialog1.FileName);
+                //textBox3.Text = DRSD.sBackupSetDirectory + "\\" + DRSD.sBackupSetXMLFilename;
+                textBox3.Text = @"/usr/local/platform/conf/platformConfig.xml";
+
+                ADHDTech.CiscoCrypt.PlatformConfigPassword oPlatformConfigDecrypter = new ADHDTech.CiscoCrypt.PlatformConfigPassword();
+
+
+                textBox_UCVersion.Text = DRSD.sUCVersion;
+                textBox_UCProduct.Text = DRSD.sUCProduct;
+                textBox_LocalAdminName.Text = DRSD.sLocalHostAdminName;
+                textBox_LocalAdminPass.Text = oPlatformConfigDecrypter.Decrypt(DRSD.sLocalHostAdminPwCrypt);
+                //textBox_LocalAdminPass.Text = ADHDTech.CiscoCrypt.Functions.DecryptCCMPlatformValue(DRSD.sLocalHostAdminPwCrypt, "49c8182574a74ca2ddc4358024e98b6e02edfb5a54e3453b7a8e3db5a697bb19");
+                textBox_SFTPPass.Text = oPlatformConfigDecrypter.Decrypt(DRSD.sSftpPwCrypt);
+                textBox_ClusterSecurity.Text = oPlatformConfigDecrypter.Decrypt(DRSD.sIPSecSecurityPwCrypt);
+                textBox_AppUserName.Text = DRSD.sApplUserUsername;
+                textBox_AppUserPass.Text = oPlatformConfigDecrypter.Decrypt(DRSD.sApplUserPwCrypt);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Form frmHostOpen = new UCOSPasswordDecrypter.frmSelectUCOSHost(myUCSHostCfg);
+            frmHostOpen.FormClosed += new FormClosedEventHandler(FormSelectUCOSHost_Closed);
+            frmHostOpen.ShowDialog();
         }
     }
 }

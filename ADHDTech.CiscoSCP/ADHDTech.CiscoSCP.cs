@@ -96,7 +96,7 @@ namespace ADHDTech.CiscoSCP
             MemoryStream xmlStream = new MemoryStream();
 
             scpClient.Connect();
-            //System.Threading.Thread.Sleep(3000);
+            System.Threading.Thread.Sleep(3000);
             try
             {
                 scpClient.Download(@"/usr/local/platform/conf/platformConfig.xml", xmlStream);
@@ -114,24 +114,24 @@ namespace ADHDTech.CiscoSCP
         }
     }
 
-    public class LiveHostClientSFTP
+    public class UCOSClientSFTP
     {
         Renci.SshNet.ConnectionInfo scpConnInfo;
         Renci.SshNet.SftpClient sftpClient;
-        public LiveHostClientSFTP(string sHostName, string sRemoteSupportUser, string sRemoteSupportPassphrase)
+        public UCOSClientSFTP(string sHostName, string sRemoteSupportUser, string sRemoteSupportPassphrase)
         {
             RemoteSupportPassphrase oReportSupportPassphrase = new RemoteSupportPassphrase();
             String sUserPassword = oReportSupportPassphrase.Decode(sRemoteSupportPassphrase);
             Renci.SshNet.AuthenticationMethod authMethod = new Renci.SshNet.PasswordAuthenticationMethod(sRemoteSupportUser, sUserPassword);
             scpConnInfo = new Renci.SshNet.ConnectionInfo(sHostName, sRemoteSupportUser, new[] { authMethod });
             sftpClient = new Renci.SshNet.SftpClient(scpConnInfo);
-
+            /*
             MemoryStream xmlStream = new MemoryStream();
 
             sftpClient.Connect();
             try
             {
-                sftpClient.BeginDownloadFile(@"/usr/local/platform/conf/platformConfig.xml", xmlStream);
+                sftpClient.DownloadFile(@"/usr/local/platform/conf/platformConfig.xml", xmlStream);
             }
             catch (Exception ex)
             {
@@ -144,6 +144,39 @@ namespace ADHDTech.CiscoSCP
             xmlStream.Read(xmlDataBytes, 0, (int)xmlStream.Length);
 
             Console.Write("{0}\n", Functions.encoding.GetString(xmlDataBytes));
+            */
+        }
+
+        public Dictionary<string, byte[]> GetSecurityFilePack() {
+            String[] SecurityFileNames = new String[] {
+                @"/usr/local/platform/conf/platformConfig.xml",
+                @"/usr/local/platform/.security/CCMEncryption/keys/dkey.txt"
+            };
+            Dictionary<String, byte[]> oSecurityFilePack = new Dictionary<String, byte[]>();
+
+            sftpClient.Connect();
+            if (sftpClient.IsConnected)
+            {
+                foreach (String sFileName in SecurityFileNames)
+                {
+                    MemoryStream memStream = new MemoryStream();
+
+                    sftpClient.DownloadFile(sFileName, memStream);
+
+                    byte[] fileBytes = new byte[memStream.Length];
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    memStream.Read(fileBytes, 0, (int)memStream.Length);
+                    oSecurityFilePack[sFileName] = fileBytes;
+                    //Console.Write("{0}\n", Functions.encoding.GetString(xmlDataBytes));
+                }
+                sftpClient.Disconnect();
+            }
+            else
+            {
+                // Error - not connected
+            }
+
+            return oSecurityFilePack;
         }
     }
 }

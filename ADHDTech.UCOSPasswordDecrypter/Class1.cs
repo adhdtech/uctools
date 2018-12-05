@@ -29,4 +29,11 @@ namespace WindowsFormsApplication1
         public static string sApplUserPwCrypt = "";
 
     }
+
+    public class UCOSHostCfg
+    {
+        public string sUCOSHost;
+        public string sUCOSRemoteUser;
+        public string sUCOSPassphrase;
+    }
 }

@@ -312,6 +312,18 @@ namespace ADHDTech.CiscoCrypt
             return oPlatformConfig;
         }
 
+        public static platformConfigXML.PlatformData LoadPlatformConfigBytes(byte[] xmlFileBytes) {
+            platformConfigXML.PlatformData oPlatformConfig = null;
+            XmlSerializer mySerializer = new XmlSerializer(typeof(platformConfigXML.PlatformData));
+            string sBackupXMLText = Encoding.UTF8.GetString(xmlFileBytes);
+            using (TextReader reader = new StringReader(sBackupXMLText))
+            {
+                oPlatformConfig = (platformConfigXML.PlatformData)mySerializer.Deserialize(reader);
+            }
+
+            return oPlatformConfig;
+        }
+
         public static string Guess(string sUnknownText)
         {
             // Let's see if we can guess the type of text using Regex
