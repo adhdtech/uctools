@@ -18,6 +18,9 @@ namespace UCOSPasswordDecrypter
         {
             InitializeComponent();
             thisHostCfg = passedHostCfg;
+            //tbUCOSHost.Text = "10.10.20.1";
+            //tbRemoteUser.Text = "myroot";
+            //tbRemotePassphrase.Text = "34NIJ8UJ3T03";
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
@@ -45,7 +48,17 @@ namespace UCOSPasswordDecrypter
             thisHostCfg.sUCOSHost = tbUCOSHost.Text;
             thisHostCfg.sUCOSRemoteUser = tbRemoteUser.Text;
             thisHostCfg.sUCOSPassphrase = tbRemotePassphrase.Text;
+            tbUCOSHost.Enabled = false;
+            tbRemoteUser.Enabled = false;
+            tbRemotePassphrase.Enabled = false;
+            btnConnect.Enabled = false;
+            this.Refresh();
             this.Close();
+        }
+
+        private void tbUCOSHost_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

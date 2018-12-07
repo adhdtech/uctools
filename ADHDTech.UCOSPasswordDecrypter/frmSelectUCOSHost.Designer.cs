@@ -43,6 +43,7 @@
             this.tbUCOSHost.Name = "tbUCOSHost";
             this.tbUCOSHost.Size = new System.Drawing.Size(193, 20);
             this.tbUCOSHost.TabIndex = 0;
+            this.tbUCOSHost.TextChanged += new System.EventHandler(this.tbUCOSHost_TextChanged);
             // 
             // tbRemoteUser
             // 

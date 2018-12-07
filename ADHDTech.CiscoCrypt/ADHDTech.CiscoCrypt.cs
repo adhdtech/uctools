@@ -237,7 +237,7 @@ namespace ADHDTech.CiscoCrypt
             return null;
         }
 
-        public static string DecryptCCMPlatformValue(string hexEncodedCryptData, string dKeyValue)
+        public static string DecryptCCMPlatformValue(string hexEncodedCryptData, string dKeyValue, bool dKeyRaw)
         {
             byte[] staticKey = Functions.encoding.GetBytes("smetsysocsiccni");
 
@@ -247,17 +247,27 @@ namespace ADHDTech.CiscoCrypt
             byte[] encryptedData = Functions.HexStringToByteArray(hexEncodedCryptData);
             byte[] dataToDecrypt = null;
 
+            bool bTruncateFirstBlock = false;
+
             if (dKeyValue == null)
             {
                 // Use static key
                 System.Buffer.BlockCopy(staticKey, 0, key, 0, staticKey.Length);
                 System.Buffer.BlockCopy(staticKey, 0, iv, 0, staticKey.Length);
                 dataToDecrypt = encryptedData;
+                bTruncateFirstBlock = true;
             }
             else
             {
                 // Use install specific dKeyValue
-                key = Functions.HexStringToByteArray(dKeyValue);
+                if (dKeyRaw)
+                {
+                    key = Encoding.UTF8.GetBytes(dKeyValue);
+                }
+                else {
+                    key = Functions.HexStringToByteArray(dKeyValue);
+                }
+                
                 System.Buffer.BlockCopy(encryptedData, 0, iv, 0, 16);
                 dataToDecrypt = new byte[encryptedData.Length - 16];
                 System.Buffer.BlockCopy(encryptedData, 16, dataToDecrypt, 0, encryptedData.Length - 16);
@@ -286,6 +296,10 @@ namespace ADHDTech.CiscoCrypt
                 // Bad decrypt
             }
 
+            if (bTruncateFirstBlock) {
+                PlaintextString = PlaintextString.Substring(16, PlaintextString.Length - 16);
+            }
+
             return PlaintextString;
         }
 
@@ -312,7 +326,8 @@ namespace ADHDTech.CiscoCrypt
             return oPlatformConfig;
         }
 
-        public static platformConfigXML.PlatformData LoadPlatformConfigBytes(byte[] xmlFileBytes) {
+        public static platformConfigXML.PlatformData LoadPlatformConfigBytes(byte[] xmlFileBytes)
+        {
             platformConfigXML.PlatformData oPlatformConfig = null;
             XmlSerializer mySerializer = new XmlSerializer(typeof(platformConfigXML.PlatformData));
             string sBackupXMLText = Encoding.UTF8.GetString(xmlFileBytes);
@@ -1715,6 +1730,76 @@ namespace ADHDTech.CiscoCrypt
             };
 
             _decrypter = _cipher.CreateDecryptor();
+        }
+    }
+
+    public class UCOSClientSSH
+    {
+        string sHostName;
+        string sUserName;
+        string sUserPassword;
+        bool Validated = false;
+
+        Renci.SshNet.ConnectionInfo sshConnInfo;
+
+        public UCOSClientSSH(string hostName, string userName, string userPassword)
+        {
+            sHostName = hostName;
+            sUserName = userName;
+            sUserPassword = userPassword;
+            Renci.SshNet.AuthenticationMethod authMethod = new Renci.SshNet.PasswordAuthenticationMethod(sUserName, sUserPassword);
+            sshConnInfo = new Renci.SshNet.ConnectionInfo(sHostName, sUserName, new[] { authMethod });
+        }
+
+        public void Validate()
+        {
+            Renci.SshNet.SftpClient sftpClient = new Renci.SshNet.SftpClient(sshConnInfo);
+            sftpClient.Connect();
+            Validated = true;
+            sftpClient.Disconnect();
+        }
+
+        public Dictionary<string, byte[]> GetFilePack(String[] sFileNames)
+        {
+            Renci.SshNet.SftpClient sftpClient = new Renci.SshNet.SftpClient(sshConnInfo);
+
+            Dictionary<String, byte[]> oFilePack = new Dictionary<String, byte[]>();
+
+            sftpClient.Connect();
+            try
+            {
+                foreach (String sFileName in sFileNames)
+                {
+                    MemoryStream memStream = new MemoryStream();
+
+                    sftpClient.DownloadFile(sFileName, memStream);
+
+                    byte[] fileBytes = new byte[memStream.Length];
+                    memStream.Seek(0, SeekOrigin.Begin);
+                    memStream.Read(fileBytes, 0, (int)memStream.Length);
+                    oFilePack[sFileName] = fileBytes;
+                    //Console.Write("{0}\n", Functions.encoding.GetString(xmlDataBytes));
+
+                }
+            }
+            catch (Exception ex)
+            {
+                sftpClient.Disconnect();
+                throw ex;
+            }
+            sftpClient.Disconnect();
+
+            return oFilePack;
+        }
+
+        public Dictionary<string, byte[]> GetSecurityFilePack()
+        {
+            String[] SecurityFileNames = new String[] {
+                @"/usr/local/platform/conf/platformConfig.xml",
+                @"/usr/local/platform/.security/CCMEncryption/keys/dkey.txt"
+            };
+
+            return GetFilePack(SecurityFileNames);
         }
     }
 }

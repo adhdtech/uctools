@@ -125,26 +125,6 @@ namespace ADHDTech.CiscoSCP
             Renci.SshNet.AuthenticationMethod authMethod = new Renci.SshNet.PasswordAuthenticationMethod(sRemoteSupportUser, sUserPassword);
             scpConnInfo = new Renci.SshNet.ConnectionInfo(sHostName, sRemoteSupportUser, new[] { authMethod });
             sftpClient = new Renci.SshNet.SftpClient(scpConnInfo);
-            /*
-            MemoryStream xmlStream = new MemoryStream();
-
-            sftpClient.Connect();
-            try
-            {
-                sftpClient.DownloadFile(@"/usr/local/platform/conf/platformConfig.xml", xmlStream);
-            }
-            catch (Exception ex)
-            {
-                string bob = ex.Message;
-            }
-            sftpClient.Disconnect();
-
-            byte[] xmlDataBytes = new byte[xmlStream.Length];
-            xmlStream.Seek(0, SeekOrigin.Begin);
-            xmlStream.Read(xmlDataBytes, 0, (int)xmlStream.Length);
-
-            Console.Write("{0}\n", Functions.encoding.GetString(xmlDataBytes));
-            */
         }
 
         public Dictionary<string, byte[]> GetSecurityFilePack() {

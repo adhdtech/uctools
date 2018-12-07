@@ -27,13 +27,13 @@ namespace WindowsFormsApplication1
         public static string sIPSecSecurityPwCrypt = "";
         public static string sApplUserUsername = "";
         public static string sApplUserPwCrypt = "";
-
+        public static string sDisplayFilePath = "";
     }
 
     public class UCOSHostCfg
     {
-        public string sUCOSHost;
-        public string sUCOSRemoteUser;
-        public string sUCOSPassphrase;
+        public string sUCOSHost = "";
+        public string sUCOSRemoteUser = "";
+        public string sUCOSPassphrase = "";
     }
 }

@@ -89,11 +89,13 @@ namespace ADHDTech.Tester
 
             Console.Write("\nTesting DecryptCCMPlatformValue\n---------------------------------\n");
 
-            TestCCMPlatformDecrypt("717b204bd092a6a19f3346719a57fba3e49daeb76d9b5a5053a29ac97a95ac09", null, "drfComponent.xml <amIRestricted>");
-            TestCCMPlatformDecrypt("e98a66b452beac44300b6c374955f18edc7dbf2931c3acdeda337035d1071809", null, "drfDevice.xml pw");
-            TestCCMPlatformDecrypt("91b856078baf8fe08762ccd1b66a47b040350b78511f4137ed624910aae2b0c5", null, "drfComponent.xml <amIRestricted>");
-            //TestCCMPlatformDecrypt("ab983513845bc5613dd46f84261b8e8342da5df42125b5970c9076e3ef8acd2f", "49c8182574a74ca2ddc4358024e98b6e02edfb5a54e3453b7a8e3db5a697bb19", "platformConfig.xml <ApplUserDbPwCrypt>");
-            TestCCMPlatformDecrypt("ab983513845bc5613dd46f84261b8e8342da5df42125b5970c9076e3ef8acd2f", null, "platformConfig.xml <ApplUserDbPwCrypt>");
+            TestCCMPlatformDecrypt("717b204bd092a6a19f3346719a57fba3e49daeb76d9b5a5053a29ac97a95ac09", null, "drfComponent.xml <amIRestricted>", false);
+            TestCCMPlatformDecrypt("e98a66b452beac44300b6c374955f18edc7dbf2931c3acdeda337035d1071809", null, "drfDevice.xml pw", false);
+            TestCCMPlatformDecrypt("91b856078baf8fe08762ccd1b66a47b040350b78511f4137ed624910aae2b0c5", null, "drfComponent.xml <amIRestricted>", false);
+            //TestCCMPlatformDecrypt("ab983513845bc5613dd46f84261b8e8342da5df42125b5970c9076e3ef8acd2f", "49c8182574a74ca2ddc4358024e98b6e02edfb5a54e3453b7a8e3db5a697bb19", "platformConfig.xml <ApplUserDbPwCrypt>", false);
+            TestCCMPlatformDecrypt("ab983513845bc5613dd46f84261b8e8342da5df42125b5970c9076e3ef8acd2f", null, "platformConfig.xml <ApplUserDbPwCrypt>", false);
+            TestCCMPlatformDecrypt("cd186af467dcf32a93b408fb9013d72342804b87ab3e7d726fba32d9de9a5862", "c251f7ac09e512b2fc89e6c20e96b989", "platformConfig.xml <LocalHostAdminPwCrypt>", true);
+            TestCCMPlatformDecrypt("6781353e2c93cb38c260008bf574a1a05e4991a096cb74836643232bb2a5548f", "c251f7ac09e512b2fc89e6c20e96b9899198d9721b0fca8359a9699fb6622be6", "platformConfig.xml <ApplUserDbPwCrypt>", false);
             //TestCCMPlatformDecrypt("a4bfca4a741c446b6478f7e6eca753290c28ed5e3b35a28f74cecef72a410330", "49c8182574a74ca2ddc4358024e98b6e02edfb5a54e3453b7a8e3db5a697bb19", "platformConfig.xml <LocalHostAdminPwCrypt>");
 
             //TestCCMPlatformDecrypt("a4bfca4a741c446b6478f7e6eca753290c28ed5e3b35a28f74cecef72a410330", "1aa83c978ec15ca9b5723e2624cdd3e9bc412b91204ad126eeec6e3205ee0bc079f991245f5f67f89b711a0c923be56dc7f2675bc45b8596c21712f96741b7b847ff645b096a292f40682e10730e8d2e84367422fea79511f0762afde2c98b22", "platformConfig.xml <LocalHostAdminPwCrypt>");
@@ -163,7 +165,7 @@ namespace ADHDTech.Tester
 
             //ADHDTech.CiscoSCP.LiveHostClient testClient = new ADHDTech.CiscoSCP.LiveHostClient("10.10.20.1", "myroot", "IDNNJIE0ZG03");
             ADHDTech.CiscoSCP.UCOSClientSFTP testClient = new ADHDTech.CiscoSCP.UCOSClientSFTP("10.10.20.1", "myroot", "IDNNJIE0ZG03");
-            Dictionary<string, byte[]> filePack = testClient.GetSecurityFilePack();
+            //Dictionary<string, byte[]> filePack = testClient.GetSecurityFilePack();
 
             //ADHDTech.CiscoSCP.LiveHostClient testClient = new ADHDTech.CiscoSCP.LiveHostClient("192.168.5.90", "trogdor", "JKFMLJ4QFD03");
 
@@ -184,9 +186,9 @@ namespace ADHDTech.Tester
             Console.ReadKey();
         }
 
-        static void TestCCMPlatformDecrypt(string sEncryptedData, string sDKey, string sSource)
+        static void TestCCMPlatformDecrypt(string sEncryptedData, string sDKey, string sSource, bool dKeyRaw)
         {
-            String sDecryptedCCMValue = Functions.DecryptCCMPlatformValue(sEncryptedData, sDKey);
+            String sDecryptedCCMValue = Functions.DecryptCCMPlatformValue(sEncryptedData, sDKey, dKeyRaw);
             String sKeyType;
             if (sDKey == null)
             {
@@ -194,7 +196,13 @@ namespace ADHDTech.Tester
             }
             else
             {
-                sKeyType = "dKey  ";
+                if (dKeyRaw)
+                {
+                    sKeyType = "dKey-R";
+                }
+                else {
+                    sKeyType = "dKey  ";
+                }
             }
             Console.Write("{0} | {1} Hex: {2}\tVal: {3}\n", sKeyType, sSource.PadRight(42), sEncryptedData, sDecryptedCCMValue);
         }
