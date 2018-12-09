@@ -150,7 +150,7 @@ namespace WindowsFormsApplication1
             label3.Font = myFnt2;
             label1.Text = "UCOS Password Decrypter";
             label2.Text = "By: Pete Brown (jpbrown@adhdtech.com)";
-            label3.Text = "Version 2.0a\nBuild 20181206-2";
+            label3.Text = "Version 2.0a\nBuild 20181206-3";
             aboutbox.Controls.Add(label1);
             aboutbox.Controls.Add(label2);
             aboutbox.Controls.Add(label3);
@@ -350,7 +350,10 @@ namespace WindowsFormsApplication1
                     DRSD.sBackupSetXMLFilename = "platformConfig.xml";
                     DRSD.sDisplayFilePath = myUCSHostCfg.sUCOSHost + ":" + DRSD.sBackupSetDirectory + "/" + DRSD.sBackupSetXMLFilename;
                     byte[] bPlatformConfig = filePack[DRSD.sBackupSetDirectory + "/" + DRSD.sBackupSetXMLFilename];
-                    byte[] bDKey = filePack[@"/usr/local/platform/.security/CCMEncryption/keys/dkey.txt"];
+                    byte[] bDKey = new byte[0];
+                    if (filePack.ContainsKey(@"/usr/local/platform/.security/CCMEncryption/keys/dkey.txt")) {
+                        bDKey = filePack[@"/usr/local/platform/.security/CCMEncryption/keys/dkey.txt"];
+                    }
                     ADHDTech.CiscoCrypt.platformConfigXML.PlatformData oPlatformConfig = ADHDTech.CiscoCrypt.Functions.LoadPlatformConfigBytes(bPlatformConfig);
                     DisplayPlatformConfig(oPlatformConfig, Functions.encoding.GetString(bDKey));
                 }

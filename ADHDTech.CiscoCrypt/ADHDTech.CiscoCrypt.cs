@@ -1784,8 +1784,8 @@ namespace ADHDTech.CiscoCrypt
             }
             catch (Exception ex)
             {
-                sftpClient.Disconnect();
-                throw ex;
+                //sftpClient.Disconnect();
+                //throw ex;
             }
             sftpClient.Disconnect();
 
