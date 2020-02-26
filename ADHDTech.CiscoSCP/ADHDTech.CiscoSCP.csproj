@@ -50,10 +50,6 @@
       <Project>{86c632f6-c599-4370-80af-3fb963a2742c}</Project>
       <Name>ADHDTech.CiscoCrypt</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Renci.SshNet\Renci.SshNet.csproj">
-      <Project>{2f5f8c90-0bd1-424f-997c-7bc6280919d1}</Project>
-      <Name>Renci.SshNet</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
