@@ -1732,7 +1732,7 @@ namespace ADHDTech.CiscoCrypt
             _decrypter = _cipher.CreateDecryptor();
         }
     }
-
+    /*
     public class UCOSClientSSH
     {
         string sHostName;
@@ -1802,4 +1802,5 @@ namespace ADHDTech.CiscoCrypt
             return GetFilePack(SecurityFileNames);
         }
     }
+    */
 }
